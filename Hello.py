@@ -13,39 +13,31 @@
 # limitations under the License.
 
 import streamlit as st
-from streamlit.logger import get_logger
+import requests
 
-LOGGER = get_logger(__name__)
+# Streamlit app to display sensor data
+st.title("ESP8266 Sensor Data")
 
+# ESP8266 server URL (replace with the actual IP address assigned to the ESP8266 AP)
+esp8266_url = "http://192.168.4.1"
 
-def run():
-    st.set_page_config(
-        page_title="Hello",
-        page_icon="👋",
-    )
+# Function to fetch sensor data from ESP8266
+def get_sensor_data():
+    try:
+        response = requests.get(esp8266_url)
+        if response.status_code == 200:
+            return response.text.split(',')
+        else:
+            return None
+    except requests.exceptions.RequestException as e:
+        print(f"Error: {e}")
+        return None
 
-    st.write("# Welcome to Streamlit! 👋")
-
-    st.sidebar.success("Select a demo above.")
-
-    st.markdown(
-        """
-        Streamlit is an open-source app framework built specifically for
-        Machine Learning and Data Science projects.
-        **👈 Select a demo from the sidebar** to see some examples
-        of what Streamlit can do!
-        ### Want to learn more?
-        - Check out [streamlit.io](https://streamlit.io)
-        - Jump into our [documentation](https://docs.streamlit.io)
-        - Ask a question in our [community
-          forums](https://discuss.streamlit.io)
-        ### See more complex demos
-        - Use a neural net to [analyze the Udacity Self-driving Car Image
-          Dataset](https://github.com/streamlit/demo-self-driving)
-        - Explore a [New York City rideshare dataset](https://github.com/streamlit/demo-uber-nyc-pickups)
-    """
-    )
-
-
-if __name__ == "__main__":
-    run()
+# Main loop to continuously update sensor data
+while True:
+    sensor_data = get_sensor_data()
+    
+    if sensor_data:
+        smoke_sensor_value, motion_sensor_value = sensor_data
+        st.write(f"Smoke Sensor Value: {smoke_sensor_value}")
+        st.write(f"Motion Sensor Value: {motion_sensor_value}")
